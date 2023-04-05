@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
-import { Radio } from 'antd';
+import { Modal, Radio } from 'antd';
 import Image from 'next/image';
 
 export default function Home() {
-    const [type, setType] = useState('ice');
+    const [type, setType] = useState('roulette');
 
     return (
         <>
@@ -84,7 +84,7 @@ function IceGame() {
 
         if (startToggle) {
             secondeTimer = setInterval(() => {
-                setSeconds((seconds) => seconds - 1);
+                setSeconds(seconds - 1);
             }, 1000);
         }
 
@@ -173,10 +173,9 @@ const iceGameStyle = css`
     height: 691px;
     background-color: #ffffff;
     margin: 0px auto;
-    position: relative;
 
     #game {
-        width: 714px;
+        width: 730px;
         height: 511px;
         background-image: url(/images/ice_bg.png);
         position: relative;
@@ -188,7 +187,7 @@ const iceGameStyle = css`
     }
 
     .mask {
-        width: 729px;
+        width: 730px;
         height: 521px;
         position: absolute;
         top: 0px;
@@ -254,6 +253,155 @@ const iceGameStyle = css`
 `;
 
 // http://dbins2.speedgabia.com/thl/work/donga_pocari/roulette.html
+
+import { random } from '@/utils/helper';
+
+import rouletteTitle from 'public/images/roulette_title.png';
+import startBtn from 'public/images/roulette_board_start.png';
+import goBtn from 'public/images/roulette_board_go.png';
+import board from 'public/images/roulette_board_bg.png';
+import arrow from 'public/images/roulette_board_arrow.png';
+
 function RouletteGame() {
-    return <article></article>;
+    const [startToggle, setStartToggle] = useState(false);
+    const [seconds, setSeconds] = useState(random(1, 5));
+    const [degree, setDegree] = useState(0);
+    let timer: any;
+    let secondeTimer: any;
+
+    const temp = ['가루', '돗자리', '가방', '꽝', '병', '가루', '타월', '포', '꽝', '병'];
+
+    useEffect(() => {
+        if (seconds === 0) {
+            console.log('RESULT', Math.round(degree / 36));
+            return clearInterval(timer);
+        }
+
+        if (startToggle) {
+            timer = setInterval(() => {
+                if (degree >= 360) {
+                    setDegree(0);
+                    return;
+                }
+                setDegree(degree + 1);
+            });
+        }
+
+        return () => {
+            clearInterval(timer);
+        };
+    }, [degree, startToggle]);
+
+    useEffect(() => {
+        if (seconds === 0) {
+            Modal.confirm({
+                content: <div>{temp[Math.round(degree / 36)]}</div>,
+                onOk() {
+                    window.location.reload();
+                },
+            });
+            return clearInterval(secondeTimer);
+        }
+
+        if (startToggle) {
+            secondeTimer = setInterval(() => {
+                setSeconds(seconds - 1);
+            }, 1000);
+        }
+
+        return () => {
+            clearInterval(secondeTimer);
+        };
+    }, [seconds, startToggle]);
+
+    const onChangeStartToggle = () => {
+        setStartToggle(!startToggle);
+    };
+
+    return (
+        <article css={rouletteStyle}>
+            <h1>
+                <Image src={rouletteTitle} alt="rouletteTitle" className="m-auto" />
+            </h1>
+
+            <div className="board_start obj" onClick={() => !startToggle && onChangeStartToggle()}>
+                <Image src={startToggle ? goBtn : startBtn} className="join" alt="start button" />
+            </div>
+            <div className="board_bg obj ">
+                <Image src={board} alt="board background" />
+            </div>
+
+            <div
+                className={`board_on obj `}
+                css={css`
+                    ${startToggle &&
+                    css`
+                        transform: rotate(${degree}deg);
+                    `}
+                `}
+            />
+
+            <div className="board_arrow obj">
+                <Image src={arrow} alt="arrow" />
+            </div>
+        </article>
+    );
 }
+
+const rouletteStyle = css`
+    width: 934px;
+    height: 671px;
+    margin: 0 auto;
+    text-align: center;
+    padding-top: 20px;
+    position: relative;
+
+    .obj {
+        position: absolute;
+    }
+
+    .board_start {
+        width: 177px;
+        height: 177px;
+        top: 295px;
+        left: 385px;
+        z-index: 5;
+        cursor: pointer;
+    }
+
+    .board_bg {
+        width: 508px;
+        height: 508px;
+        top: 140px;
+        left: 220px;
+        z-index: 2;
+    }
+
+    .board_on {
+        width: 415px;
+        height: 415px;
+        top: 175px;
+        left: 265px;
+        z-index: 3;
+        background-image: url(/images/roulette_board_on.png);
+    }
+    .board_arrow {
+        width: 90px;
+        height: 105px;
+        top: 110px;
+        left: 425px;
+        z-index: 5;
+    }
+
+    .go {
+        animation: spin 1s infinite linear;
+    }
+    @keyframes spin {
+        from {
+            transform: rotateZ(0deg);
+        }
+        to {
+            transform: rotateZ(360deg);
+        }
+    }
+`;
