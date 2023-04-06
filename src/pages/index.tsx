@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import { Button, Modal, Radio } from 'antd';
 import Image from 'next/image';
+import { random } from '@/utils/helper';
 
 export default function Home() {
-    const [type, setType] = useState('roulette');
+    const [type, setType] = useState('ice');
 
     return (
         <>
@@ -166,11 +167,11 @@ function IceGame() {
                                                 opacity: 1;
                                             }
                                             50% {
-                                                transform: rotate(10deg) scale(1.1);
+                                                transform: rotate(${random(0, 2) ? 10 : -10}deg) scale(1.1);
                                             }
                                             100% {
                                                 opacity: 0;
-                                                transform: rotate(10deg) scale(1.1);
+                                                transform: rotate(${random(0, 2) ? 10 : -10}deg) scale(1.1);
                                             }
                                         }
 
@@ -278,8 +279,6 @@ const iceGameStyle = css`
 `;
 
 // http://dbins2.speedgabia.com/thl/work/donga_pocari/roulette.html
-
-import { random } from '@/utils/helper';
 
 import rouletteTitle from 'public/images/roulette_title.png';
 import startBtn from 'public/images/roulette_board_start.png';
