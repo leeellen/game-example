@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
-import { Modal, Radio } from 'antd';
+import { Button, Modal, Radio } from 'antd';
 import Image from 'next/image';
 
 export default function Home() {
@@ -287,117 +287,112 @@ import goBtn from 'public/images/roulette_board_go.png';
 import board from 'public/images/roulette_board_bg.png';
 import arrow from 'public/images/roulette_board_arrow.png';
 
+const testData = [
+    {
+        minDegree: 341,
+        maxDegree: 17,
+        degree: 1,
+        value: '포카리스웨트 분말',
+        percent: 15,
+    },
+    {
+        minDegree: 18,
+        maxDegree: 53,
+        degree: 37,
+        value: '포카리스웨트 메트',
+        percent: 0,
+    },
+    {
+        minDegree: 54,
+        maxDegree: 88,
+        degree: 75,
+        value: '포카리스웨트 가방',
+        percent: 3,
+    },
+    {
+        minDegree: 89,
+        maxDegree: 125,
+        degree: 100,
+        value: '꽝',
+        percent: 20,
+    },
+    {
+        minDegree: 126,
+        maxDegree: 160,
+        degree: 150,
+        value: '포카리스웨트 텀블러',
+        percent: 5,
+    },
+    {
+        minDegree: 161,
+        maxDegree: 196,
+        degree: 177,
+        value: '포카리스웨트 분말',
+        percent: 15,
+    },
+    {
+        minDegree: 197,
+        maxDegree: 232,
+        degree: 215,
+        value: '포카리스웨트 비치 타월',
+        percent: 7,
+    },
+    {
+        minDegree: 233,
+        maxDegree: 268,
+        degree: 255,
+        value: '포카리스웨트 미니 분말',
+        percent: 10,
+    },
+    {
+        minDegree: 269,
+        maxDegree: 304,
+        degree: 280,
+        value: '꽝',
+        percent: 20,
+    },
+    {
+        minDegree: 305,
+        maxDegree: 340,
+        degree: 327,
+        value: '포카리스웨트 텀블러',
+        percent: 5,
+    },
+];
+
+type DataType = {
+    minDegree: number;
+    maxDegree: number;
+    degree: number;
+    percent: number;
+    value: string;
+};
 function RouletteGame() {
     const [startToggle, setStartToggle] = useState(false);
     const [seconds, setSeconds] = useState(random(3, 5));
-    const [degree, setDegree] = useState(0);
+    const [selectData, setSelectData] = useState<DataType>();
 
-    console.log('degree', degree);
+    console.log('selectData', selectData);
 
-    const rotationValues = [
-        {
-            minDegree: 341,
-            maxDegree: 17,
-            value: '포카리스웨트 분말',
-        },
-        {
-            minDegree: 18,
-            maxDegree: 53,
-            value: '포카리스웨트 메트',
-        },
-        {
-            minDegree: 54,
-            maxDegree: 88,
-            value: '포카리스웨트 가방',
-        },
-        {
-            minDegree: 89,
-            maxDegree: 125,
-            value: '꽝',
-        },
-        {
-            minDegree: 126,
-            maxDegree: 160,
-            value: '포카리스웨트 텀블러',
-        },
-        {
-            minDegree: 161,
-            maxDegree: 196,
-            value: '포카리스웨트 분말',
-        },
-        {
-            minDegree: 197,
-            maxDegree: 232,
-            value: '포카리스웨트 비치 타월',
-        },
-        {
-            minDegree: 233,
-            maxDegree: 268,
-            value: '포카리스웨트 미니 분말',
-        },
-        {
-            minDegree: 269,
-            maxDegree: 304,
-            value: '꽝',
-        },
-        {
-            minDegree: 305,
-            maxDegree: 340,
-            value: '포카리스웨트 텀블러',
-        },
-    ];
+    const randomItem = (itemsList: DataType[]) => {
+        let chances = [];
 
-    useEffect(() => {
-        let timer: any;
+        const totalPercent = itemsList.reduce((prev, curr) => prev + curr.percent, 0);
 
-        if (seconds === 0) {
-            return clearInterval(timer);
-        }
+        let acc = 0;
+        chances = itemsList.map(({ percent }) => (acc = percent + acc));
 
-        if (startToggle) {
-            timer = setInterval(() => {
-                if (degree >= 360) {
-                    setDegree(0);
-                    return;
-                }
-                setDegree(degree + 1);
-            }, 10);
-        }
+        const rand = Math.random() * totalPercent;
 
-        return () => {
-            clearInterval(timer);
-        };
-    }, [degree, startToggle]);
+        const itemIndex = chances.filter((el) => el <= rand).length;
 
-    useEffect(() => {
-        let secondeTimer: any;
-
-        if (seconds === 0) {
-            Modal.confirm({
-                content: <div>{getResult()}</div>,
-                onOk() {
-                    window.location.reload();
-                },
-            });
-            return clearInterval(secondeTimer);
-        }
-
-        if (startToggle) {
-            secondeTimer = setInterval(() => {
-                setSeconds(seconds - 1);
-            }, 1000);
-        }
-
-        return () => {
-            clearInterval(secondeTimer);
-        };
-    }, [seconds, startToggle]);
+        return itemsList.find((_, index) => index === itemIndex);
+    };
 
     const onChangeStartToggle = () => {
         setStartToggle(!startToggle);
+        setSelectData(randomItem(testData));
     };
-
-    const getResult = () => rotationValues.find((e) => e.minDegree <= degree && e.maxDegree >= degree)?.value;
 
     return (
         <article css={rouletteStyle}>
@@ -413,11 +408,26 @@ function RouletteGame() {
             </div>
 
             <div
+                onAnimationEnd={() =>
+                    Modal.confirm({
+                        content: <div>{selectData?.value}!</div>,
+                        onOk() {
+                            window.location.reload();
+                        },
+                    })
+                }
                 className={`board_on obj `}
                 css={css`
                     ${startToggle &&
                     css`
-                        transform: rotate(${degree}deg);
+                        @keyframes spin {
+                            100% {
+                                transform: rotate(${selectData?.degree ? selectData?.degree + 1800 : 0}deg);
+                            }
+                        }
+                        animation-duration: 2s;
+                        animation-name: spin;
+                        animation-fill-mode: forwards;
                     `}
                 `}
             />
