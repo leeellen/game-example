@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import { Modal, Radio } from 'antd';
 import Image from 'next/image';
@@ -77,8 +77,13 @@ function IceGame() {
 
     useEffect(() => {
         if (seconds === 0) {
-            alert('종료!');
-            window.location.reload();
+            Modal.confirm({
+                content: <div>종료!</div>,
+                onOk() {
+                    window.location.reload();
+                },
+            });
+
             return clearInterval(secondeTimer);
         }
 
@@ -97,7 +102,12 @@ function IceGame() {
         const visibleList = iceList.filter((e) => e.visible).length;
 
         if (!visibleList) {
-            alert('완료!');
+            Modal.confirm({
+                content: <div>성공!</div>,
+                onOk() {
+                    window.location.reload();
+                },
+            });
             window.location.reload();
         }
     }, [iceList]);
@@ -151,9 +161,24 @@ function IceGame() {
                                     src={e.visible ? ice : ice_break}
                                     alt="ice"
                                     css={css`
-                                        opacity: ${e.visible ? 1 : 0};
+                                        @keyframes break {
+                                            0% {
+                                                opacity: 1;
+                                            }
+                                            50% {
+                                                transform: rotate(10deg) scale(1.1);
+                                            }
+                                            100% {
+                                                opacity: 0;
+                                                transform: rotate(10deg) scale(1.1);
+                                            }
+                                        }
+
                                         ${!e.visible &&
                                         css`
+                                            animation-duration: 1s;
+                                            animation-name: break;
+                                            animation-fill-mode: forwards;
                                             cursor: default;
                                         `}
                                     `}
@@ -264,16 +289,68 @@ import arrow from 'public/images/roulette_board_arrow.png';
 
 function RouletteGame() {
     const [startToggle, setStartToggle] = useState(false);
-    const [seconds, setSeconds] = useState(random(1, 5));
+    const [seconds, setSeconds] = useState(random(3, 5));
     const [degree, setDegree] = useState(0);
-    let timer: any;
-    let secondeTimer: any;
 
-    const temp = ['가루', '돗자리', '가방', '꽝', '병', '가루', '타월', '포', '꽝', '병'];
+    console.log('degree', degree);
+
+    const rotationValues = [
+        {
+            minDegree: 341,
+            maxDegree: 17,
+            value: '포카리스웨트 분말',
+        },
+        {
+            minDegree: 18,
+            maxDegree: 53,
+            value: '포카리스웨트 메트',
+        },
+        {
+            minDegree: 54,
+            maxDegree: 88,
+            value: '포카리스웨트 가방',
+        },
+        {
+            minDegree: 89,
+            maxDegree: 125,
+            value: '꽝',
+        },
+        {
+            minDegree: 126,
+            maxDegree: 160,
+            value: '포카리스웨트 텀블러',
+        },
+        {
+            minDegree: 161,
+            maxDegree: 196,
+            value: '포카리스웨트 분말',
+        },
+        {
+            minDegree: 197,
+            maxDegree: 232,
+            value: '포카리스웨트 비치 타월',
+        },
+        {
+            minDegree: 233,
+            maxDegree: 268,
+            value: '포카리스웨트 미니 분말',
+        },
+        {
+            minDegree: 269,
+            maxDegree: 304,
+            value: '꽝',
+        },
+        {
+            minDegree: 305,
+            maxDegree: 340,
+            value: '포카리스웨트 텀블러',
+        },
+    ];
 
     useEffect(() => {
+        let timer: any;
+
         if (seconds === 0) {
-            console.log('RESULT', Math.round(degree / 36));
             return clearInterval(timer);
         }
 
@@ -284,7 +361,7 @@ function RouletteGame() {
                     return;
                 }
                 setDegree(degree + 1);
-            });
+            }, 10);
         }
 
         return () => {
@@ -293,9 +370,11 @@ function RouletteGame() {
     }, [degree, startToggle]);
 
     useEffect(() => {
+        let secondeTimer: any;
+
         if (seconds === 0) {
             Modal.confirm({
-                content: <div>{temp[Math.round(degree / 36)]}</div>,
+                content: <div>{getResult()}</div>,
                 onOk() {
                     window.location.reload();
                 },
@@ -317,6 +396,8 @@ function RouletteGame() {
     const onChangeStartToggle = () => {
         setStartToggle(!startToggle);
     };
+
+    const getResult = () => rotationValues.find((e) => e.minDegree <= degree && e.maxDegree >= degree)?.value;
 
     return (
         <article css={rouletteStyle}>
