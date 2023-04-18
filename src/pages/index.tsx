@@ -23,6 +23,9 @@ export default function Home() {
                     onChange={(e) => setType(e.target.value)}
                     value={type}
                 >
+                    <Radio.Button className="w-[150px] text-center" value="scratch">
+                        복권
+                    </Radio.Button>
                     <Radio.Button className="w-[150px] text-center" value="ice">
                         얼음 깨기
                     </Radio.Button>
@@ -31,13 +34,71 @@ export default function Home() {
                     </Radio.Button>
                 </Radio.Group>
 
+                {type === 'scratch' && <ScratchGame />}
                 {type === 'ice' && <IceGame />}
                 {type === 'roulette' && <RouletteGame />}
             </main>
         </>
     );
 }
+import ScratchCard from 'react-scratchcard-v2';
+const IMG =
+    'https://plus.unsplash.com/premium_photo-1681140029775-36a657447c4f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=770&q=80';
 
+function ScratchGame() {
+    const ref = useRef<ScratchCard>(null);
+    const [selectData, setSelectData] = useState<DataType>();
+
+    useEffect(() => {
+        setSelectData(randomItem(testData));
+    }, []);
+
+    const onClickReset = () => {
+        ref.current && ref.current.reset();
+    };
+
+    const randomItem = (itemsList: DataType[]) => {
+        let chances = [];
+
+        const totalPercent = itemsList.reduce((prev, curr) => prev + curr.percent, 0);
+
+        let acc = 0;
+        chances = itemsList.map(({ percent }) => (acc = percent + acc));
+
+        const rand = Math.random() * totalPercent;
+
+        const itemIndex = chances.filter((el) => el <= rand).length;
+
+        return itemsList.find((_, index) => index === itemIndex);
+    };
+
+    return (
+        <div>
+            <button onClick={onClickReset}>Reset</button>
+            <ScratchCard
+                width={320}
+                height={226}
+                image={IMG}
+                finishPercent={70}
+                onComplete={() => console.log('complete')}
+            >
+                <div
+                    style={{
+                        display: 'flex',
+                        width: '100%',
+                        height: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <h1>{selectData?.value}</h1>
+                </div>
+            </ScratchCard>
+        </div>
+    );
+}
+
+// http://dbins2.speedgabia.com/thl/work/donga_pocari/ice.html
 import title from 'public/images/ice_title.png';
 import start from 'public/images/ice_mask.png';
 import ice from 'public/images/ice_ice1.png';
@@ -51,7 +112,6 @@ const temp = new Array(40).fill(0).map((e, i) => ({
     visible: true,
 }));
 
-// http://dbins2.speedgabia.com/thl/work/donga_pocari/ice.html
 function IceGame() {
     const [startToggle, setStartToggle] = useState(false);
     const [iceList, setIceList] = useState(temp);
@@ -279,7 +339,6 @@ const iceGameStyle = css`
 `;
 
 // http://dbins2.speedgabia.com/thl/work/donga_pocari/roulette.html
-
 import rouletteTitle from 'public/images/roulette_title.png';
 import startBtn from 'public/images/roulette_board_start.png';
 import goBtn from 'public/images/roulette_board_go.png';
