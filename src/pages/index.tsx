@@ -87,7 +87,7 @@ export type DataType = {
 };
 
 export default function Home() {
-    const [type, setType] = useState('ice');
+    const [type, setType] = useState('roulette');
 
     return (
         <>

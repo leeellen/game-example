@@ -10,6 +10,22 @@ import startBtn from 'public/images/roulette_board_start.png';
 import goBtn from 'public/images/roulette_board_go.png';
 import board from 'public/images/roulette_board_bg.png';
 import arrow from 'public/images/roulette_board_arrow.png';
+import { random } from '@/utils/helper';
+
+const randomItem = (itemsList: DataType[]) => {
+    let chances = [];
+
+    const totalPercent = itemsList.reduce((prev, curr) => prev + curr.percent, 0);
+
+    let acc = 0;
+    chances = itemsList.map(({ percent }) => (acc = percent + acc));
+
+    const rand = Math.random() * totalPercent;
+
+    const itemIndex = chances.filter((el) => el <= rand).length;
+
+    return itemsList.find((_, index) => index === itemIndex);
+};
 
 const testData = [
     {
@@ -92,26 +108,261 @@ const testData = [
     // },
 ];
 
+const test1 = [
+    {
+        minDegree: 301,
+        maxDegree: 360,
+        degree: random(301, 360),
+        value: '다음 기회에',
+        percent: 30,
+    },
+    {
+        minDegree: 1,
+        maxDegree: 60,
+        degree: random(1, 60),
+        value: 'BHC 뿌링클',
+        percent: 15,
+    },
+    {
+        minDegree: 61,
+        maxDegree: 120,
+        degree: random(61, 120),
+        value: '에어팟 프로 2세대',
+        percent: 1,
+    },
+    {
+        minDegree: 121,
+        maxDegree: 180,
+        degree: random(121, 180),
+        value: '스타벅스 아메리카노',
+        percent: 12,
+    },
+    {
+        minDegree: 181,
+        maxDegree: 240,
+        degree: random(181, 240),
+        value: '다음 기회에',
+        percent: 30,
+    },
+    {
+        minDegree: 241,
+        maxDegree: 300,
+        degree: random(241, 300),
+        value: '오로나민 씨',
+        percent: 12,
+    },
+];
 export default function RouletteGame() {
     const [startToggle, setStartToggle] = useState(false);
     const [selectData, setSelectData] = useState<DataType>();
 
-    console.log('selectData', selectData);
+    // console.log('selectData?.degree', selectData?.degree + 360);
 
-    const randomItem = (itemsList: DataType[]) => {
-        let chances = [];
-
-        const totalPercent = itemsList.reduce((prev, curr) => prev + curr.percent, 0);
-
-        let acc = 0;
-        chances = itemsList.map(({ percent }) => (acc = percent + acc));
-
-        const rand = Math.random() * totalPercent;
-
-        const itemIndex = chances.filter((el) => el <= rand).length;
-
-        return itemsList.find((_, index) => index === itemIndex);
+    const onChangeStartToggle = () => {
+        setStartToggle(!startToggle);
+        setSelectData(randomItem(test1));
     };
+
+    return (
+        <div css={tempCss}>
+            <div className="background">
+                <ul
+                    onAnimationEnd={() =>
+                        Modal.confirm({
+                            content: <div>{selectData?.value}!</div>,
+                            onOk() {
+                                window.location.reload();
+                            },
+                        })
+                    }
+                    css={css`
+                        ${startToggle &&
+                        css`
+                            @keyframes spin {
+                                100% {
+                                    transform: rotate(${selectData?.degree ? selectData?.degree + 1800 : 0}deg);
+                                }
+                            }
+                            animation-duration: 3s;
+                            animation-name: spin;
+                            animation-fill-mode: forwards;
+                        `}
+                    `}
+                >
+                    <li className="one">
+                        <div className="text">다음 기회에</div>
+                    </li>
+                    <li className="two">
+                        <div className="text">
+                            <div
+                                css={css`
+                                    display: flex;
+                                    flex-direction: column;
+                                    gap: 15px;
+                                    align-items: center;
+                                `}
+                            >
+                                오로나민 씨
+                                <Image src={arrow} alt="pin" />
+                            </div>
+                        </div>
+                    </li>
+                    <li className="three">
+                        <div className="text">다음 기회에</div>
+                    </li>
+                    <li className="four">
+                        <div className="text">
+                            <div
+                                css={css`
+                                    display: flex;
+                                    flex-direction: column;
+                                    gap: 15px;
+                                    align-items: center;
+                                `}
+                            >
+                                스타벅스 아메리카노
+                                <Image src={arrow} alt="pin" />
+                            </div>
+                        </div>
+                    </li>
+                    <li className="five">
+                        <div className="text">에어팟 프로 2세대</div>
+                    </li>
+                    <li className="six">
+                        <div className="text">
+                            <div
+                                css={css`
+                                    display: flex;
+                                    flex-direction: column;
+                                    gap: 15px;
+                                    align-items: center;
+                                `}
+                            >
+                                BHC 뿌링클
+                                <Image src={arrow} alt="pin" />
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+                <Image className="pin" src={arrow} alt="pin" />
+                <div className="start" onClick={() => !startToggle && onChangeStartToggle()}>
+                    <button>{startToggle ? 'GO!' : 'START'}</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+const tempCss = css`
+    .background {
+        background: #f7fafd;
+        width: fit-content;
+        height: fit-content;
+        padding: 25px;
+        margin: 0 auto;
+        border-radius: 50%;
+        position: relative;
+    }
+    ul {
+        width: 475px;
+        height: 475px;
+        position: relative;
+        border-radius: 50%;
+        overflow: hidden;
+    }
+
+    li {
+        height: 50%;
+        width: 275px;
+        clip-path: polygon(100% 0%, 50% 100%, 0% 0%);
+        position: absolute;
+        transform: translateX(-50%);
+        transform-origin: bottom;
+        left: 21%;
+        display: flex;
+        justify-content: center;
+        padding: 8%;
+    }
+
+    .one {
+        background: #492ce9;
+        transform: rotate(30deg);
+    }
+    .two {
+        transform: rotate(90deg);
+        background: #fff;
+    }
+    .three {
+        transform: rotate(150deg);
+        background: #492ce9;
+    }
+    .four {
+        transform: rotate(210deg);
+        background: #fff;
+    }
+    .five {
+        transform: rotate(270deg);
+        background: #492ce9;
+    }
+    .six {
+        transform: rotate(330deg);
+        background: #fff;
+    }
+
+    .text {
+        font-weight: 700;
+        font-size: 20px;
+        line-height: 25px;
+        text-align: center;
+        color: #ffffff;
+        line-height: 25px;
+    }
+
+    .two .text,
+    .four .text,
+    .six .text {
+        color: #000;
+    }
+
+    .pin {
+        position: absolute;
+        top: 8%;
+        left: 50.5%;
+        transform: translate(-50%, -50%);
+    }
+    .start {
+        background: #f7fafd;
+        width: fit-content;
+        height: fit-content;
+        padding: 15px;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .start button {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        background: #492ce9;
+        width: 115px;
+        height: 115px;
+        border-radius: 50%;
+        transition: all 0.3s;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25), inset 3px 4px 3px rgba(255, 255, 255, 0.25);
+    }
+    .start button:active {
+        transform: scale(0.95);
+    }
+`;
+
+function RouletteGame1() {
+    const [startToggle, setStartToggle] = useState(false);
+    const [selectData, setSelectData] = useState<DataType>();
+
+    console.log('selectData', selectData);
 
     const onChangeStartToggle = () => {
         setStartToggle(!startToggle);
