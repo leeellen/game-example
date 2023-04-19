@@ -12,7 +12,7 @@ import board from 'public/images/roulette_board_bg.png';
 import arrow from 'public/images/roulette_board_arrow.png';
 import { random } from '@/utils/helper';
 
-const randomItem = (itemsList: DataType[]) => {
+export const randomItem = (itemsList: DataType[]) => {
     let chances = [];
 
     const totalPercent = itemsList.reduce((prev, curr) => prev + curr.percent, 0);
@@ -107,8 +107,7 @@ const testData = [
     //     percent: 5,
     // },
 ];
-
-const test1 = [
+export const test1 = [
     {
         minDegree: 301,
         maxDegree: 360,
